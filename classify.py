@@ -64,11 +64,11 @@ class KNNClassifier:
         return correct / float(len(test_data)) * 100.0
 
 if __name__ == "__main__":
-    feature_columns = ['spectral_rolloff_mean', 'mfcc_1_mean', 'spectral_centroids', 'tempo']
+    feature_columns = ['spectral_rolloff_mean', 'mfcc_1_mean', 'spectral_centroid_mean', 'tempo']
     classifier = KNNClassifier(k=5, weighted=True)  # Enable weighted voting
-    train_data = classifier.load_data('training_set.csv')
-    test_data = classifier.load_data('testing_set.csv')
-    classifier.fit(train_data, feature_columns)
+    train_data = classifier.load_data('GenreClassData_30s.csv')
+    test_data = classifier.load_data('GenreClassData_30s.csv')
+    #classifier.fit(train_data, feature_columns)
     predictions = classifier.predict(test_data, feature_columns)
     accuracy = classifier.calculate_accuracy(test_data, predictions)
     print(f'Accuracy: {accuracy:.2f}%')
