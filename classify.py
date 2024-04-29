@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import confusion_matrix
 from sklearn.mixture import GaussianMixture
 
 class KNNClassifier:
@@ -63,6 +64,11 @@ class KNNClassifier:
     def calculate_accuracy(self, test_data, predictions):
         correct = sum(1 for i in range(len(test_data)) if test_data.iloc[i]['Genre'] == predictions[i])
         return correct / float(len(test_data)) * 100.0
+
+    def get_confusion_matrix(self, test_data, predictions):
+        actual_labels = test_data['genre'].values
+        cm = confusion_matrix(actual_labels, predictions, labels=np.unique(actual_labels))
+        return cm
 
 def find_optimal_k(train_data, test_data, feature_columns):
     best_k = 0
@@ -166,6 +172,11 @@ if __name__ == "__main__":
     #print(find_optimal_k(train_data, test_data, feature_columns))
     #print(find_best_features(train_data, test_data, classifier, feature_columns))
     #classifier.fit(train_data, feature_columns)
+    predictions = classifier.predict(test_data, feature_columns)
+    accuracy = classifier.calculate_accuracy(test_data, predictions)
+    cm = classifier.get_confusion_matrix(test_data, predictions)
+    print(f'Accuracy: {accuracy:.2f}%')
+    print("Confusion Matrix:\n", cm)
     #predictions = classifier.predict(test_data, feature_columns)
     #accuracy = classifier.calculate_accuracy(test_data, predictions)
     #print(f'Accuracy: {accuracy:.2f}%')
