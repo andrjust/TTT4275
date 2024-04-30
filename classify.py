@@ -70,10 +70,10 @@ class KNNClassifier:
         cm = confusion_matrix(actual_labels, predictions, labels=np.unique(actual_labels))
         return cm
 
-def find_optimal_k(train_data, test_data, feature_columns):
+def find_optimal_k(train_data, test_data, feature_columns, interval=(1, 30)):
     best_k = 0
     best_accuracy = 0
-    for k in range(1, 101):
+    for k in range(interval[0], interval[1]):
         classifier = KNNClassifier(k=k, weighted=True)
         classifier.fit(train_data, feature_columns)
         predictions = classifier.predict(test_data, feature_columns)
@@ -98,39 +98,33 @@ def find_best_mfcc(train_data, test_data, classifier):
             best_accuracy = accuracy
     return best_mfcc, best_accuracy
 
-def find_best_features(train_data, test_data, classifier, features):
-    current_best_features = ['spectral_rolloff_mean', 'tempo', 'spectral_centroid_mean']
+def find_best_features(train_data, test_data, classifier, potential_features, requierd_features=[], N = 1):
+    current_best_features = requierd_features
     best_accuracy = 0
 
-    for i in range(len(features)):
+    for i in range(N):
         candidate_mfcc = None
         candidate_accuracy = 0
-        
-        for feature in features:
-            # Check if feature is already included
+        for feature in potential_features:
             if feature in current_best_features:
                 continue
             
-            # Add the feature to the current set of features
             candidate_features = current_best_features + [feature]
             classifier.fit(train_data, candidate_features)
             predictions = classifier.predict(test_data, candidate_features)
             accuracy = classifier.calculate_accuracy(test_data, predictions)
             
-            # Update candidate feature if it improves accuracy
             if accuracy > candidate_accuracy:
                 candidate_accuracy = accuracy
                 candidate_mfcc = feature
         
-        # If adding the best candidate improves accuracy, update the best features and accuracy
         if candidate_accuracy > best_accuracy:
             best_accuracy = candidate_accuracy
             current_best_features.append(candidate_mfcc)
             print(f'Current Best Features: {current_best_features}, Current Accuracy: {best_accuracy:.2f}%')
         else:
-            # If adding more features does not improve accuracy, stop the search
             break
-    
+
     return current_best_features, best_accuracy
 
 

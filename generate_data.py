@@ -1,32 +1,50 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
+import random
+import numpy as np
 
 n_train = 80
 n_validation = 10
-data_set = pd.read_csv('Data/GenreClassData_30s.txt', sep='\t')
+data = pd.read_csv('Data/GenreClassData_10s.txt', delimiter='\t')
+random.seed(42)
 
-train_validation_sets = []
-train_sets = []
-test_sets = []
-val_sets = []
+track_ids = data['TrackID'].tolist()
+genre_ids = data['GenreID'].tolist()
+genre_track_dict = {key: value for key, value in zip(track_ids, genre_ids)}
+genre_track_list = list(genre_track_dict.items())
 
-genre_groups = data_set.groupby('GenreID')
+genre_id_list = [[] for _ in range(10)]
 
-for genre, group_data in genre_groups:
-    # Split the data for the current genre into training, validation, and test sets
-    train_data, test_and_val_data = train_test_split(group_data, test_size=30, random_state=42)
-    val_data, test_data = train_test_split(test_and_val_data, test_size=15, random_state=42)
+for key, value in genre_track_list:
+    genre_id_list[value].append(key)
+
+test_list = []
+val_list= []
+train_list = []
+ 
+for list in genre_id_list:
+    random.shuffle(list)
+    lengths = [int(len(list) * p) for p in [0.15,0.15, 0.70]]
+    parts = [list[:lengths[0]], list[lengths[0]:sum(lengths[:2])], list[sum(lengths[:2]):]]
+    test_list.extend(parts[0])
+    val_list.extend(parts[1])
+    train_list.extend(parts[2])
     
-    # Append the splits for the current genre to the respective lists
-    train_sets.append(train_data)
-    val_sets.append(val_data)
-    test_sets.append(test_data)
+            
+train_data = data[data['TrackID'].isin(train_list)]
+val_data = data[data['TrackID'].isin(val_list)]
+test_data = data[data['TrackID'].isin(test_list)]
 
-# Concatenate the splits for each genre into the final training, validation, and test sets
-train_set = pd.concat(train_sets)
-val_set = pd.concat(val_sets)
-test_set = pd.concat(test_sets)
+train_data.to_csv('Data/task4/10s_train.txt', sep='\t', index=False)
+test_data.to_csv('Data/task4/10s_test.txt', sep='\t', index=False)
+val_data.to_csv('Data/task4/10s_val.txt', sep='\t', index=False)
 
-train_set.to_csv('Data/train_data_task4.txt', sep='\t', index=False)
-test_set.to_csv('Data/test_data_task4.txt', sep='\t', index=False)
-val_set.to_csv('Data/val_data_task4.txt', sep='\t', index=False)
+
+
+     
+            
+        
+
+#train_data.to_csv('Data/task4/5s_train.txt', sep='\t', index=False)
+#test_data.to_csv('Data/task4/5s_test.txt', sep='\t', index=False)
+#val_data.to_csv('Data/task4/5s_val.txt', sep='\t', index=False)
