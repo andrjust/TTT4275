@@ -1,6 +1,6 @@
-from classify import KNNClassifier, find_best_features
+from kNNclassifier import KNNClassifier
+from optimize_functions import find_optimal_k, find_best_features
 
-known_features = ['spectral_rolloff_mean', 'mfcc_1_mean', 'spectral_centroid_mean', 'tempo']
 potential_features = [
     'zero_cross_rate_mean', 'zero_cross_rate_std', 'rmse_mean', 'rmse_var', 
     'spectral_centroid_mean', 'spectral_centroid_var', 'spectral_bandwidth_mean', 'spectral_bandwidth_var', 
@@ -16,35 +16,34 @@ potential_features = [
     'mfcc_10_mean', 'mfcc_11_mean', 'mfcc_12_mean', 'mfcc_1_std', 'mfcc_2_std', 'mfcc_3_std', 
     'mfcc_4_std', 'mfcc_5_std', 'mfcc_6_std', 'mfcc_7_std', 'mfcc_8_std', 'mfcc_9_std', 
     'mfcc_10_std', 'mfcc_11_std', 'mfcc_12_std']
-classifier = KNNClassifier(k=5, weighted=True)  # Enable weighted voting
-train_data = classifier.load_data('Data/train_data_task3.txt')
-test_data = classifier.load_data('Data/test_data_task3.txt')
-val_data = classifier.load_data('Data/val_data_task3.txt')
+
+#Load data
+classifier = KNNClassifier(k=5, weighted=True)
+train_data = classifier.load_data('Data/task4/5s_train.txt')
+test_data = classifier.load_data('Data/task4/5s_test.txt')
+val_data = classifier.load_data('Data/task4/5s_val.txt')
+
+#Find best features:
+best_features = find_best_features(train_data, val_data, classifier, potential_features, N=len(potential_features))
+
+#Find optimal k
+k = find_optimal_k(train_data, val_data, best_features, (1, 30))
+
+classifier_optimal = KNNClassifier(k, weighted=True)
 
 
-#Find the best features
-best_features = []
-best_accuracy = 0
 
-for i in known_features:
-    feature_vector = [a for a in known_features if  a!= i]
-    features, accuracy = find_best_features(train_data, val_data, classifier, potential_features, included_features=feature_vector, times=1)
-    print(f'Features: {features}, Accuracy: {accuracy:.2f}%')
-    if accuracy > best_accuracy:
-        best_accuracy = accuracy
-        best_features = features
+classifier_optimal.fit(train_data, best_features)
 
-print(f'Best Features: {best_features}, Accuracy: {best_accuracy:.2f}%')
-print(f'Validation Accuracy: {best_accuracy:.2f}%')
+predictions = classifier.predict(train_data, best_features)
+accuracy = classifier.calculate_accuracy(train_data, predictions)
+print(f'Train Accuracy: {accuracy:.2f}%')
 
-#Test the data
-classifier.fit(train_data, best_features)
+predictions = classifier.predict(val_data, best_features)
+accuracy = classifier.calculate_accuracy(val_data, predictions)
+print(f'Val Accuracy: {accuracy:.2f}%')
+
 predictions = classifier.predict(test_data, best_features)
 accuracy = classifier.calculate_accuracy(test_data, predictions)
 print(f'Test Accuracy: {accuracy:.2f}%')
-
-classifier.fit(train_data, best_features)
-predictions = classifier.predict(train_data, best_features)
-accuracy = classifier.calculate_accuracy(train_data, predictions)
-print(f' Accuracy: {accuracy:.2f}%')
 

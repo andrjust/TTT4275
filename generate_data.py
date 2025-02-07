@@ -1,7 +1,5 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
 import random
-import numpy as np
 
 n_train = 80
 n_validation = 10
@@ -38,13 +36,3 @@ test_data = data[data['TrackID'].isin(test_list)]
 train_data.to_csv('Data/task4/10s_train.txt', sep='\t', index=False)
 test_data.to_csv('Data/task4/10s_test.txt', sep='\t', index=False)
 val_data.to_csv('Data/task4/10s_val.txt', sep='\t', index=False)
-
-
-
-     
-            
-        
-
-#train_data.to_csv('Data/task4/5s_train.txt', sep='\t', index=False)
-#test_data.to_csv('Data/task4/5s_test.txt', sep='\t', index=False)
-#val_data.to_csv('Data/task4/5s_val.txt', sep='\t', index=False)
